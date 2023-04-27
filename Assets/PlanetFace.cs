@@ -1,7 +1,7 @@
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
-public class PlanetPartPrefab : MonoBehaviour
+public class PlanetFace : MonoBehaviour
 {
     public MeshFilter MeshFilter => GetComponent<MeshFilter>();
     public MeshRenderer MeshRenderer => GetComponent<MeshRenderer>();

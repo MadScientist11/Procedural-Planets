@@ -163,7 +163,6 @@ public struct MeshJob<G, S, D> : IJobFor
     ) 
     {
         MeshJob<G, S, D> job = new MeshJob<G, S, D>();
-        job._generator.Resolution = resolution;
         job._generator.Setup(data);
         job._streams.Setup(
             meshData,

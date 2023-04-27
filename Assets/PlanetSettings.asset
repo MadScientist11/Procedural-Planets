@@ -12,11 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7a9544a62ad54e8b8c54369e03afc1c6, type: 3}
   m_Name: PlanetSettings
   m_EditorClassIdentifier: 
-  Resolution: 64
-  Radius: 0.81
+  Resolution: 248
+  Radius: 0.78
   Color: {r: 0.9056604, g: 0.31559274, b: 0.18369527, a: 0}
-  Frequency: 1.84
-  Persistence: 0.45
-  Amplitude: 0.39
+  Frequency: 2.89
+  Persistence: 0.43
+  Amplitude: 1
   Octaves: 5
-  Seed: 38
+  Seed: 17
+  MinValue: 0.23

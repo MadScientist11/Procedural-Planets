@@ -7,7 +7,8 @@ namespace Planets
     {
         public struct TerrainFaceData : IData
         {
-            public Vector3 LocalUp { get; }
+            public float3 LocalUp { get; }
+            public int Resolution { get; }
             public float Radius { get; }
             public int Seed { get; set; }
             public int Octave { get; set; }
@@ -15,23 +16,25 @@ namespace Planets
             public float Amplitude { get; set; }
             public float Frequency { get; set; }
             public float BaseAmplitude { get; set; }
+            public float MinValue { get; set; }
 
-            public TerrainFaceData(Vector3 localUp, float radius, float frequency, float amplitude, float persistence,
-                int seed, int octave)
+            public TerrainFaceData(Vector3 localUp, PlanetSettings planetSettings)
             {
                 LocalUp = localUp;
-                Radius = radius;
-                Seed = seed;
-                Octave = octave;
-                Persistence = persistence;
-                Amplitude = amplitude;
-                Frequency = frequency;
-                BaseAmplitude = amplitude;
+                Radius = planetSettings.Radius;
+                Seed = planetSettings.Seed;
+                Octave = planetSettings.Octaves;
+                Persistence = planetSettings.Persistence;
+                Amplitude = planetSettings.Amplitude;
+                Frequency = planetSettings.Frequency;
+                BaseAmplitude = planetSettings.Amplitude;
+                MinValue = planetSettings.MinValue;
+                Resolution = planetSettings.Resolution;
             }
         }
 
-        private Vector3 _axisA => new Vector3(Data.LocalUp.y, Data.LocalUp.z, Data.LocalUp.x);
-        private Vector3 _axisB => Vector3.Cross(Data.LocalUp, _axisA);
+        private float3 AxisA => Data.LocalUp.yzx;
+        private float3 AxisB => Vector3.Cross(Data.LocalUp, AxisA);
 
         public TerrainFaceData Data { get; private set; }
 
@@ -39,6 +42,7 @@ namespace Planets
         public void Setup(TerrainFaceData data)
         {
             Data = data;
+            Resolution = data.Resolution;
         }
 
         public int VertexCount => Resolution * Resolution;
@@ -58,10 +62,10 @@ namespace Planets
                     int i = x + y * Resolution;
                     Vector2 percent = new Vector2(x, y) / (Resolution - 1);
                     Vector3 pointOnUnitCube =
-                        Data.LocalUp + (percent.x - .5f) * 2 * _axisA + (percent.y - .5f) * 2 * _axisB;
+                        Data.LocalUp + (percent.x - .5f) * 2 * AxisA + (percent.y - .5f) * 2 * AxisB;
                     Vector3 pointOnUnitSphere = pointOnUnitCube.normalized;
                     var vertex = new Vertex();
-                    vertex.position = SamplePlanetPoint(pointOnUnitSphere, Data.Radius);
+                    vertex.position = SamplePlanetPoint(pointOnUnitSphere, Data.Radius, Data.MinValue);
                     vertex.normal = Vector3.back;
                     streams.SetVertex(i, vertex);
 
@@ -78,26 +82,32 @@ namespace Planets
             }
         }
 
-        public float Noise3D(float3 point, float frequency, float amplitude, float persistence, int octave, int seed)
+        private float Noise3D(float3 point, float frequency, float amplitude, float persistence, int octave, int seed)
         {
             float noise = 0.0f;
 
+
             for (int i = 0; i < octave; ++i)
             {
-                noise += Unity.Mathematics.noise.snoise(point * frequency + seed, out float3 grad) * amplitude;
+                float snoise = Unity.Mathematics.noise.snoise(point * frequency + seed, out float3 grad);
+                noise += (snoise + 1) * 0.5f * amplitude;
                 amplitude *= persistence;
                 frequency *= 2.0f;
             }
 
-            // Use the average of all octaves
             return noise / octave;
         }
 
-        private Vector3 SamplePlanetPoint(Vector3 pointOnUnitSphere, float radius)
+        private Vector3 SamplePlanetPoint(Vector3 pointOnUnitSphere, float radius, float minValue)
         {
-            return pointOnUnitSphere * radius *
-                   (1 + (Noise3D(pointOnUnitSphere, Data.Frequency, Data.BaseAmplitude, Data.Persistence,Data.Octave, Data.Seed) * Data.Amplitude));
+            float elevation = Noise3D(pointOnUnitSphere, Data.Frequency, Data.BaseAmplitude, Data.Persistence,
+                Data.Octave,
+                Data.Seed) * Data.Amplitude;
+
+            elevation = Mathf.Max(0, elevation - minValue);
+            return pointOnUnitSphere * radius * (1 + elevation);
         }
+
 
         bool LastRow(int x)
         {

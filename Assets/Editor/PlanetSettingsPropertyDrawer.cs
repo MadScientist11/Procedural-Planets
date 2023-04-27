@@ -47,21 +47,15 @@ namespace Planets.Editor
             }
         }
 
-        public static IEnumerable<FieldInfo> GetFieldsWithAttribute<T>(PlanetSettings settings) where T : Attribute
-        {
-            return settings.GetType()
-                .GetFields(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
-                .Where(f => f.GetCustomAttribute<T>() != null);
-        }
-
         private Dictionary<string, Foldout> _foldouts = new();
 
         private VisualElement DrawSettingsFields(SerializedProperty property)
         {
-            var assetObject = new SerializedObject(property.objectReferenceValue);
-
+            SerializedObject assetObject = new SerializedObject(property.objectReferenceValue);
             Box box = new Box();
             VisualElement foldoutsContainer = new VisualElement();
+            _foldouts.Clear();
+            
             box.Add(foldoutsContainer);
 
             FieldInfo[] fields = typeof(PlanetSettings).GetFields(BindingFlags.Public | BindingFlags.Instance);
@@ -87,7 +81,7 @@ namespace Planets.Editor
         private Foldout GetOrCreateFoldout(VisualElement container, FoldoutAttribute foldoutAttribute)
         {
             Foldout foldout = _foldouts.GetOrCreate(foldoutAttribute.Name);
-            if (string.IsNullOrEmpty(foldout.text))
+            if (!container.Contains(foldout))
             {
                 container.Add(foldout);
                 foldout.text = foldoutAttribute.Name;

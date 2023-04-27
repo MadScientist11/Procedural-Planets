@@ -1,31 +1,32 @@
 using Planets;
 using UnityEngine;
 
+
 public class PlanetGenerator
 {
     private readonly Transform _meshParent;
-    private readonly PlanetPartPrefab _planetPartPrefab;
+    private readonly PlanetFaceFactory _planetFaceFactory;
 
-    private PlanetPartPrefab[] _planetParts;
+    private PlanetFace[] _planetFaces;
 
-    public PlanetGenerator(Transform meshParent, PlanetPartPrefab planetPartPrefab)
+    public PlanetGenerator(Transform meshParent, PlanetFaceFactory planetFaceFactory)
     {
         _meshParent = meshParent;
-        _planetPartPrefab = planetPartPrefab;
+        _planetFaceFactory = planetFaceFactory;
     }
 
     public void Initialize()
     {
-        if (_planetParts == null || _planetParts.Length == 0)
-            _planetParts = new PlanetPartPrefab[6];
+        if (_planetFaces == null || _planetFaces.Length == 0)
+            _planetFaces = new PlanetFace[6];
 
         for (int i = 0; i < 6; i++)
         {
-            if (_planetParts[i] == null)
+            if (_planetFaces[i] == null)
             {
-                PlanetPartPrefab face = Object.Instantiate(_planetPartPrefab, _meshParent);
-                _planetParts[i] = face;
-                _planetParts[i].MeshFilter.sharedMesh = new Mesh();
+                PlanetFace face = _planetFaceFactory.CreateFace(_meshParent);
+                _planetFaces[i] = face;
+                _planetFaces[i].MeshFilter.sharedMesh = new Mesh();
             }
         }
     }
@@ -36,8 +37,8 @@ public class PlanetGenerator
 
         for (int i = 0; i < 6; i++)
         {
-            CreateFace(_planetParts[i].MeshFilter.sharedMesh, directions[i], settings);
-            _planetParts[i].MeshRenderer.sharedMaterial.color = settings.Color;
+            CreateFace(_planetFaces[i].MeshFilter.sharedMesh, directions[i], settings);
+            _planetFaces[i].MeshRenderer.sharedMaterial.color = settings.Color;
         }
     }
 
@@ -47,7 +48,7 @@ public class PlanetGenerator
         Mesh.MeshData meshData = meshDataArray[0];
 
         MeshJob<TerrainFaceJobs, SingleStream, TerrainFaceJobs.TerrainFaceData>.ScheduleParallel(
-            mesh, meshData, settings.Resolution, new TerrainFaceJobs.TerrainFaceData(direction, settings.Radius, settings.Frequency, settings.Amplitude, settings.Persistence, settings.Seed, settings.Octaves), default
+            mesh, meshData, settings.Resolution, new TerrainFaceJobs.TerrainFaceData(direction, settings), default
         ).Complete();
 
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh);

@@ -22,7 +22,9 @@ namespace Planets
         public int Octaves = 6;
         [Foldout("Noise Settings")]
         public int Seed = 1;
-        
+        [Foldout("Noise Settings")]
+        public float MinValue;
+
         private void OnValidate()
         {
             EditorUtility.SetDirty(this);
@@ -32,18 +34,6 @@ namespace Planets
         public void RaiseChangedEvent()
         {
             OnSettingsUpdated?.Invoke(this);
-        }
-    }
-
-    public class FoldoutAttribute : Attribute
-    {
-        private readonly string _name;
-
-        public string Name => _name;
-
-        public FoldoutAttribute(string name)
-        {
-            _name = name;
         }
     }
 }
