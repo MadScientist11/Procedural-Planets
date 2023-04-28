@@ -34,23 +34,23 @@ public class PlanetGenerator
     public void CreatePlanet(PlanetSettings settings)
     {
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
-        PlanetSettingsDTO planetSettingsDto = settings.ToJobDTO();
 
 
         for (int i = 0; i < 6; i++)
         {
-            CreateFace(_planetFaces[i].MeshFilter.sharedMesh, directions[i], planetSettingsDto);
+            CreateFace(_planetFaces[i].MeshFilter.sharedMesh, directions[i], settings);
             _planetFaces[i].MeshRenderer.sharedMaterial.color = settings.Color;
         }
     }
 
-    private void CreateFace(Mesh mesh, Vector3 direction, PlanetSettingsDTO settings)
+    private void CreateFace(Mesh mesh, Vector3 direction, PlanetSettings settings)
     {
+        PlanetSettingsDTO planetSettingsDto = settings.ToJobDTO();
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 
         MeshJob<TerrainFaceJobs, SingleStream, TerrainFaceJobs.TerrainFaceData>.ScheduleParallel(
-            mesh, meshData,new TerrainFaceJobs.TerrainFaceData(direction, settings), default
+            mesh, meshData,new TerrainFaceJobs.TerrainFaceData(direction, planetSettingsDto), default
         ).Complete();
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh);
         mesh.RecalculateNormals();

@@ -70,7 +70,6 @@ namespace Planets
                     }
                 }
             }
-
         }
 
         private float3 SamplePlanetPoint(float3 point, PlanetSettingsDTO planetSettings)
@@ -78,23 +77,18 @@ namespace Planets
             float elevation = 0;
             float firstLayerMask = 0;
 
-            if (planetSettings.NoiseLayers.Length > 0)
-            {
-                firstLayerMask = CalculateNoiseValue(point, planetSettings.NoiseLayers[0]);
-                if (planetSettings.NoiseLayers[0].Enabled)
-                {
-                    elevation = firstLayerMask;
-                }
-            }
 
-
-            for (var i = 1; i < planetSettings.NoiseLayers.Length; i++)
+            for (var i = 0; i < planetSettings.NoiseLayers.Length; i++)
             {
                 NoiseLayer noiseLayer = planetSettings.NoiseLayers[i];
+                float noiseValue = CalculateNoiseValue(point, noiseLayer);
 
-                if (planetSettings.NoiseLayers[i].Enabled)
+                if (i == 0) 
+                    firstLayerMask = noiseValue;
+
+                if (noiseLayer.Enabled)
                 {
-                    elevation += CalculateNoiseValue(point, noiseLayer);
+                    elevation += noiseValue * (noiseLayer.UseFirstLayerAsMask ? firstLayerMask : 1);
                 }
             }
 
@@ -107,7 +101,7 @@ namespace Planets
             {
                 PlanetNoiseType.Simple =>
                     NoiseHelpers.SampleSimpleNoise(point, noiseLayer.Settings.SimpleNoiseSettings),
-                PlanetNoiseType.Rigid => 
+                PlanetNoiseType.Rigid =>
                     NoiseHelpers.SampleRigidNoise(point, noiseLayer.Settings.RigidNoiseSettings),
                 _ => throw new ArgumentOutOfRangeException()
             };

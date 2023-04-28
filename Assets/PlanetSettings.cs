@@ -2,6 +2,7 @@
 using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Planets
 {
@@ -39,7 +40,7 @@ namespace Planets
     public struct NoiseLayer
     {
         public bool Enabled;
-        public bool UseAsLayerMask;
+        [FormerlySerializedAs("UseAsLayerMask")] public bool UseFirstLayerAsMask;
         public NoiseSettings Settings;
     }
 
@@ -71,6 +72,7 @@ namespace Planets
         public int Octaves;
         public int Seed;
         public float MinValue;
+        public float WeightMultiplier;
     }
 
     public struct PlanetSettingsDTO
@@ -78,6 +80,6 @@ namespace Planets
         public int Resolution;
         public float Radius;
         public Color Color;
-        [DeallocateOnJobCompletion] public NativeArray<NoiseLayer> NoiseLayers;
+        [DeallocateOnJobCompletion] [ReadOnly] public NativeArray<NoiseLayer> NoiseLayers;
     }
 }
