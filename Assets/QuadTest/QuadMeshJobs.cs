@@ -28,7 +28,7 @@ public struct SingleStream : IMeshStreams
 
     public void Setup(Mesh.MeshData meshData, Bounds bounds, int vertexCount, int indexCount)
     {
-        var descriptor = new NativeArray<VertexAttributeDescriptor>(
+        NativeArray<VertexAttributeDescriptor> descriptor = new NativeArray<VertexAttributeDescriptor>(
             4, Allocator.Temp, NativeArrayOptions.UninitializedMemory
         );
         descriptor[0] = new VertexAttributeDescriptor(dimension: 3);
@@ -159,7 +159,7 @@ public struct MeshJob<G, S, D> : IJobFor
         _generator.Execute(index, _streams);
 
     public static JobHandle ScheduleParallel(Mesh mesh,
-        Mesh.MeshData meshData, int resolution, D data, JobHandle dependency
+        Mesh.MeshData meshData, D data, JobHandle dependency
     ) 
     {
         MeshJob<G, S, D> job = new MeshJob<G, S, D>();
@@ -219,7 +219,7 @@ public class QuadMeshJobs : MonoBehaviour
         Mesh.MeshData meshData = meshDataArray[0];
 
         MeshJob<SquareGrid, SingleStream, SquareGridData>.ScheduleParallel(
-            mesh, meshData, resolution,new SquareGridData(),default
+            mesh, meshData, new SquareGridData(),default
         ).Complete();
 
         Mesh.ApplyAndDisposeWritableMeshData(meshDataArray, mesh);

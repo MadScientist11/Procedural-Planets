@@ -1,6 +1,8 @@
 ﻿using System;
+using Unity.Collections;
 using UnityEditor;
 using UnityEngine;
+
 namespace Planets
 {
     [CreateAssetMenu(fileName = "PlanetSettings", menuName = "Planets/PlanetSettings")]
@@ -11,19 +13,9 @@ namespace Planets
         public int Resolution = 10;
         public float Radius = 1;
         public Color Color;
-        
-        [Foldout("Noise Settings")]
-        public float Frequency = 1;
-        [Foldout("Noise Settings")]
-        public float Persistence = 0.25f;
-        [Foldout("Noise Settings")]
-        public float Amplitude = 1;
-        [Foldout("Noise Settings")]
-        public int Octaves = 6;
-        [Foldout("Noise Settings")]
-        public int Seed = 1;
-        [Foldout("Noise Settings")]
-        public float MinValue;
+
+        public NoiseLayer[] NoiseLayers;
+
 
         private void OnValidate()
         {
@@ -35,5 +27,57 @@ namespace Planets
         {
             OnSettingsUpdated?.Invoke(this);
         }
+    }
+
+    public enum PlanetNoiseType
+    {
+        Simple = 0,
+        Rigid = 1,
+    }
+
+    [Serializable]
+    public struct NoiseLayer
+    {
+        public bool Enabled;
+        public bool UseAsLayerMask;
+        public NoiseSettings Settings;
+    }
+
+    [Serializable]
+    public struct NoiseSettings
+    {
+        public PlanetNoiseType NoiseType;
+        public SimpleNoiseSettings SimpleNoiseSettings;
+        public RigidNoiseSettings RigidNoiseSettings;
+    }
+
+    [Serializable]
+    public struct SimpleNoiseSettings
+    {
+        public float Frequency;
+        public float Persistence;
+        public float Amplitude;
+        public int Octaves;
+        public int Seed;
+        public float MinValue;
+    }
+
+    [Serializable]
+    public struct RigidNoiseSettings
+    {
+        public float Frequency;
+        public float Persistence;
+        public float Amplitude;
+        public int Octaves;
+        public int Seed;
+        public float MinValue;
+    }
+
+    public struct PlanetSettingsDTO
+    {
+        public int Resolution;
+        public float Radius;
+        public Color Color;
+        [DeallocateOnJobCompletion] public NativeArray<NoiseLayer> NoiseLayers;
     }
 }

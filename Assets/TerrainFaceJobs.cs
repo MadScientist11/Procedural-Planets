@@ -1,4 +1,6 @@
-﻿using Unity.Mathematics;
+﻿using System;
+using Unity.Collections;
+using Unity.Mathematics;
 using UnityEngine;
 
 namespace Planets
@@ -7,28 +9,17 @@ namespace Planets
     {
         public struct TerrainFaceData : IData
         {
+            public PlanetSettingsDTO PlanetSettings { get; }
             public float3 LocalUp { get; }
             public int Resolution { get; }
             public float Radius { get; }
-            public int Seed { get; set; }
-            public int Octave { get; set; }
-            public float Persistence { get; set; }
-            public float Amplitude { get; set; }
-            public float Frequency { get; set; }
-            public float BaseAmplitude { get; set; }
-            public float MinValue { get; set; }
 
-            public TerrainFaceData(Vector3 localUp, PlanetSettings planetSettings)
+
+            public TerrainFaceData(Vector3 localUp, PlanetSettingsDTO planetSettings)
             {
+                PlanetSettings = planetSettings;
                 LocalUp = localUp;
                 Radius = planetSettings.Radius;
-                Seed = planetSettings.Seed;
-                Octave = planetSettings.Octaves;
-                Persistence = planetSettings.Persistence;
-                Amplitude = planetSettings.Amplitude;
-                Frequency = planetSettings.Frequency;
-                BaseAmplitude = planetSettings.Amplitude;
-                MinValue = planetSettings.MinValue;
                 Resolution = planetSettings.Resolution;
             }
         }
@@ -36,10 +27,10 @@ namespace Planets
         private float3 AxisA => Data.LocalUp.yzx;
         private float3 AxisB => Vector3.Cross(Data.LocalUp, AxisA);
 
-        public TerrainFaceData Data { get; private set; }
+        public TerrainFaceJobs.TerrainFaceData Data { get; private set; }
 
 
-        public void Setup(TerrainFaceData data)
+        public void Setup(TerrainFaceJobs.TerrainFaceData data)
         {
             Data = data;
             Resolution = data.Resolution;
@@ -63,9 +54,9 @@ namespace Planets
                     Vector2 percent = new Vector2(x, y) / (Resolution - 1);
                     Vector3 pointOnUnitCube =
                         Data.LocalUp + (percent.x - .5f) * 2 * AxisA + (percent.y - .5f) * 2 * AxisB;
-                    Vector3 pointOnUnitSphere = pointOnUnitCube.normalized;
-                    var vertex = new Vertex();
-                    vertex.position = SamplePlanetPoint(pointOnUnitSphere, Data.Radius, Data.MinValue);
+                    float3 pointOnUnitSphere = pointOnUnitCube.normalized;
+                    Vertex vertex = new Vertex();
+                    vertex.position = SamplePlanetPoint(pointOnUnitSphere, Data.PlanetSettings);
                     vertex.normal = Vector3.back;
                     streams.SetVertex(i, vertex);
 
@@ -73,39 +64,53 @@ namespace Planets
                     if (LastRow(x).Not() && LastColumn(y).Not())
                     {
                         streams.SetTriangle(triIndex, new int3(i, i + Resolution + 1, i + Resolution));
-
                         streams.SetTriangle(triIndex + 1, new int3(i, i + 1, i + Resolution + 1));
 
                         triIndex += 2;
                     }
                 }
             }
+
         }
 
-        private float Noise3D(float3 point, float frequency, float amplitude, float persistence, int octave, int seed)
+        private float3 SamplePlanetPoint(float3 point, PlanetSettingsDTO planetSettings)
         {
-            float noise = 0.0f;
+            float elevation = 0;
+            float firstLayerMask = 0;
 
-
-            for (int i = 0; i < octave; ++i)
+            if (planetSettings.NoiseLayers.Length > 0)
             {
-                float snoise = Unity.Mathematics.noise.snoise(point * frequency + seed, out float3 grad);
-                noise += (snoise + 1) * 0.5f * amplitude;
-                amplitude *= persistence;
-                frequency *= 2.0f;
+                firstLayerMask = CalculateNoiseValue(point, planetSettings.NoiseLayers[0]);
+                if (planetSettings.NoiseLayers[0].Enabled)
+                {
+                    elevation = firstLayerMask;
+                }
             }
 
-            return noise / octave;
+
+            for (var i = 1; i < planetSettings.NoiseLayers.Length; i++)
+            {
+                NoiseLayer noiseLayer = planetSettings.NoiseLayers[i];
+
+                if (planetSettings.NoiseLayers[i].Enabled)
+                {
+                    elevation += CalculateNoiseValue(point, noiseLayer);
+                }
+            }
+
+            return point * planetSettings.Radius * (1 + elevation);
         }
 
-        private Vector3 SamplePlanetPoint(Vector3 pointOnUnitSphere, float radius, float minValue)
+        private float CalculateNoiseValue(float3 point, NoiseLayer noiseLayer)
         {
-            float elevation = Noise3D(pointOnUnitSphere, Data.Frequency, Data.BaseAmplitude, Data.Persistence,
-                Data.Octave,
-                Data.Seed) * Data.Amplitude;
-
-            elevation = Mathf.Max(0, elevation - minValue);
-            return pointOnUnitSphere * radius * (1 + elevation);
+            return noiseLayer.Settings.NoiseType switch
+            {
+                PlanetNoiseType.Simple =>
+                    NoiseHelpers.SampleSimpleNoise(point, noiseLayer.Settings.SimpleNoiseSettings),
+                PlanetNoiseType.Rigid => 
+                    NoiseHelpers.SampleRigidNoise(point, noiseLayer.Settings.RigidNoiseSettings),
+                _ => throw new ArgumentOutOfRangeException()
+            };
         }
 
 

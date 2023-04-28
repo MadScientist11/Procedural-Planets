@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Unity.Collections;
 
 namespace Planets
 {
@@ -20,5 +21,16 @@ namespace Planets
 
             return val;
         }
+        
+        public static PlanetSettingsDTO ToJobDTO(this PlanetSettings planetSettings)
+        {
+            return new PlanetSettingsDTO
+            {
+                Resolution = planetSettings.Resolution,
+                Radius = planetSettings.Radius,
+                Color = planetSettings.Color,
+                NoiseLayers = new NativeArray<NoiseLayer>(planetSettings.NoiseLayers, Allocator.TempJob),
+            };
+        }   
     }
 }
