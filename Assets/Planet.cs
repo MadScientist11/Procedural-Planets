@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Planets
 {
@@ -10,15 +12,26 @@ namespace Planets
         private void OnEnable()
         {
             _planetGenerator = new PlanetGenerator(transform, new PlanetFaceFactory());
-            _planetGenerator.Initialize();
-            
+            _planetGenerator.Initialize(_planetSettings);
+
             _planetSettings.OnSettingsUpdated += RecreatePlanet;
         }
 
         private void OnDisable() =>
             _planetSettings.OnSettingsUpdated -= RecreatePlanet;
 
-        private void RecreatePlanet(PlanetSettings settings) => 
-            _planetGenerator.CreatePlanet(settings);
+        private void RecreatePlanet(PlanetSettings settings) =>
+            _planetGenerator.CreatePlanetMesh();
+    }
+
+    [Serializable]
+    public struct PlanetMinMax
+    {
+        [SerializeField] private Vector2 _minMaxRange;
+        
+        public Vector2 CalculateHeightMapRange(float radius)
+        {
+            return _minMaxRange + radius * Vector2.one;
+        }
     }
 }

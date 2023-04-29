@@ -8,6 +8,7 @@ public class PlanetGenerator
     private readonly PlanetFaceFactory _planetFaceFactory;
 
     private PlanetFace[] _planetFaces;
+    private PlanetSettings _settings;
 
     public PlanetGenerator(Transform meshParent, PlanetFaceFactory planetFaceFactory)
     {
@@ -15,8 +16,9 @@ public class PlanetGenerator
         _planetFaceFactory = planetFaceFactory;
     }
 
-    public void Initialize()
+    public void Initialize(PlanetSettings settings)
     {
+        _settings = settings;
         if (_planetFaces == null || _planetFaces.Length == 0)
             _planetFaces = new PlanetFace[6];
         
@@ -24,26 +26,26 @@ public class PlanetGenerator
         {
             if (_planetFaces[i] == null)
             {
-                PlanetFace face = _planetFaceFactory.CreateFace(_meshParent);
+                PlanetFace face = _planetFaceFactory.CreateFace(_meshParent, _settings);
                 _planetFaces[i] = face;
                 _planetFaces[i].MeshFilter.sharedMesh = new Mesh();
             }
         }
     }
 
-    public void CreatePlanet(PlanetSettings settings)
+    public void CreatePlanetMesh()
     {
         Vector3[] directions = { Vector3.up, Vector3.down, Vector3.left, Vector3.right, Vector3.forward, Vector3.back };
 
 
         for (int i = 0; i < 6; i++)
         {
-            CreateFace(_planetFaces[i].MeshFilter.sharedMesh, directions[i], settings);
-            _planetFaces[i].MeshRenderer.sharedMaterial.color = settings.Color;
+            CreateFaceMesh(_planetFaces[i].MeshFilter.sharedMesh, directions[i], _settings);
+            _planetFaces[i].MeshRenderer.sharedMaterial.color = _settings.Color;
         }
     }
 
-    private void CreateFace(Mesh mesh, Vector3 direction, PlanetSettings settings)
+    private void CreateFaceMesh(Mesh mesh, Vector3 direction, PlanetSettings settings)
     {
         PlanetSettingsDTO planetSettingsDto = settings.ToJobDTO();
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);

@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Planets;
+using UnityEngine;
 
 public class PlanetFaceFactory
 {
@@ -9,8 +10,12 @@ public class PlanetFaceFactory
         _planetFacePrefab = Resources.Load<PlanetFace>("PlanetFacePrefab");
     }
 
-    public PlanetFace CreateFace(Transform parent)
+    public PlanetFace CreateFace(Transform parent, PlanetSettings settings)
     {
-        return Object.Instantiate(_planetFacePrefab, parent);
+        PlanetFace planetFace = Object.Instantiate(_planetFacePrefab, parent);
+        Shader planetShader = Shader.Find("Shader Graphs/Planet");
+        planetFace.MeshRenderer.sharedMaterial = new Material(planetShader);
+        planetFace.Construct(settings);
+        return planetFace;
     }
 }
