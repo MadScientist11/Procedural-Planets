@@ -1,11 +1,12 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace Planets
 {
     public class Planet : MonoBehaviour
     {
+        public int Value;
+        [Foldout("Value", typeof(PlanetSettings))]
         [SerializeField] private PlanetSettings _planetSettings;
         private PlanetGenerator _planetGenerator;
 
