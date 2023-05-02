@@ -1,3 +1,4 @@
+using System.Linq;
 using Planets;
 using UnityEngine;
 
@@ -6,27 +7,35 @@ public class PlanetFace : MonoBehaviour
 {
     public MeshFilter MeshFilter => _meshFilter ??= GetComponent<MeshFilter>();
     public MeshRenderer MeshRenderer => _meshRenderer ??= GetComponent<MeshRenderer>();
-    
+
     private MeshFilter _meshFilter;
     private MeshRenderer _meshRenderer;
     private PlanetSettings _planetSettings;
-    
+
     private static readonly int Min = Shader.PropertyToID("_Min");
     private static readonly int Max = Shader.PropertyToID("_Max");
-    
+
     public void Construct(PlanetSettings planetSettings)
     {
         _planetSettings = planetSettings;
-        _planetSettings.OnSettingsUpdated += UpdateHeightValues;
     }
 
-    private void OnDestroy() =>
-        _planetSettings.OnSettingsUpdated -= UpdateHeightValues;
-
-    private void UpdateHeightValues(PlanetSettings settings)
+    public void UpdatePlanetFace(Texture2D colorTexture)
     {
-        Vector2 heightMapMinMax = settings.MinMaxHeight.CalculateHeightMapRange(settings.Radius);
-        MeshRenderer.sharedMaterial.SetFloat(Min, heightMapMinMax.x);
-        MeshRenderer.sharedMaterial.SetFloat(Max, heightMapMinMax.y);
+        MeshRenderer.sharedMaterial.SetTexture("_MainTex", colorTexture);
+        UpdateHeightValues();
+    }
+
+    private void UpdateHeightValues()
+    {
+        float lowestVertex = float.MaxValue;
+        float highestVertex = float.MinValue;
+        float max = MeshFilter.sharedMesh.vertices.Max(Vector3.Magnitude);
+        float min = MeshFilter.sharedMesh.vertices.Min(Vector3.Magnitude);
+        highestVertex = Mathf.Max(highestVertex, max);
+        lowestVertex = Mathf.Min(lowestVertex, min);
+        Vector2 minMax = new Vector2(lowestVertex, highestVertex);
+        MeshRenderer.sharedMaterial.SetFloat(Min, minMax.x);
+        MeshRenderer.sharedMaterial.SetFloat(Max, minMax.y);
     }
 }

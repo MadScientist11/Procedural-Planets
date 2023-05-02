@@ -3,7 +3,7 @@ using System.Reflection;
 
 namespace Planets.Editor
 {
-    public class EditorExtensions
+    public class EditorHelpers
     {
         public static Type GetPropertyDrawer(Type classType)
         {

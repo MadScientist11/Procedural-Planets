@@ -18,8 +18,8 @@ namespace Planets.Editor
             {
                 text = foldoutAttribute.Name
             };
-
-            Type propertyDrawer = EditorExtensions.GetPropertyDrawer(foldoutAttribute.EditorType);
+            
+            Type propertyDrawer = EditorHelpers.GetPropertyDrawer(property.objectReferenceValue.GetType());
             if(propertyDrawer != null)
             {
                 PropertyDrawer editor = (PropertyDrawer)Activator.CreateInstance(propertyDrawer);

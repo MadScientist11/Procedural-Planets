@@ -6,8 +6,7 @@ namespace Planets
     public class Planet : MonoBehaviour
     {
         public int Value;
-        [Foldout("Value", typeof(PlanetSettings))]
-        [SerializeField] private PlanetSettings _planetSettings;
+        [Foldout("Valueee")] [SerializeField] private PlanetSettings _planetSettings;
         private PlanetGenerator _planetGenerator;
 
         private void OnEnable()
@@ -22,17 +21,8 @@ namespace Planets
             _planetSettings.OnSettingsUpdated -= RecreatePlanet;
 
         private void RecreatePlanet(PlanetSettings settings) =>
-            _planetGenerator.CreatePlanetMesh();
+            _planetGenerator.CreatePlanet();
     }
 
-    [Serializable]
-    public struct PlanetMinMax
-    {
-        [SerializeField] private Vector2 _minMaxRange;
-        
-        public Vector2 CalculateHeightMapRange(float radius)
-        {
-            return _minMaxRange + radius * Vector2.one;
-        }
-    }
+  
 }

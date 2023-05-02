@@ -14,7 +14,7 @@ namespace Planets
         public int Resolution = 10;
         public float Radius = 1;
         public Color Color;
-        public PlanetMinMax MinMaxHeight;
+        public Gradient ColorGraident;
 
         public NoiseLayer[] NoiseLayers;
 
