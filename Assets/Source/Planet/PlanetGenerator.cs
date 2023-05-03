@@ -47,7 +47,7 @@ public class PlanetGenerator
 
     private void CreateFaceMesh(Mesh mesh, Vector3 direction, PlanetSettings settings)
     {
-        PlanetSettingsDTO planetSettingsDto = settings.ToJobDTO();
+        PlanetSettingsDto planetSettingsDto = settings.ToJobDTO();
         Mesh.MeshDataArray meshDataArray = Mesh.AllocateWritableMeshData(1);
         Mesh.MeshData meshData = meshDataArray[0];
 

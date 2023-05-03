@@ -22,9 +22,9 @@ namespace Planets
             return val;
         }
         
-        public static PlanetSettingsDTO ToJobDTO(this PlanetSettings planetSettings)
+        public static PlanetSettingsDto ToJobDTO(this PlanetSettings planetSettings)
         {
-            return new PlanetSettingsDTO
+            return new PlanetSettingsDto
             {
                 Resolution = planetSettings.Resolution,
                 Radius = planetSettings.Radius,

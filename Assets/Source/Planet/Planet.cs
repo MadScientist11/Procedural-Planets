@@ -1,12 +1,12 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Planets
 {
     public class Planet : MonoBehaviour
     {
-        public int Value;
-        [Foldout("Valueee")] [SerializeField] private PlanetSettings _planetSettings;
+        [Foldout("Planet Settings")] 
+        [SerializeField] private PlanetSettings _planetSettings;
+
         private PlanetGenerator _planetGenerator;
 
         private void OnEnable()
@@ -20,9 +20,9 @@ namespace Planets
         private void OnDisable() =>
             _planetSettings.OnSettingsUpdated -= RecreatePlanet;
 
-        private void RecreatePlanet(PlanetSettings settings) =>
+        private void RecreatePlanet(PlanetSettings settings)
+        {
             _planetGenerator.CreatePlanet();
+        }
     }
-
-  
 }

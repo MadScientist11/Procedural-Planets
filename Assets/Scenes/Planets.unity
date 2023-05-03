@@ -353,5 +353,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 90da5a3ffd404acc9f7f96ffd040b875, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Value: 2
+  Value: 0
   _planetSettings: {fileID: 11400000, guid: 11e21da58e0d0ce4eb1f01b94554172c, type: 2}

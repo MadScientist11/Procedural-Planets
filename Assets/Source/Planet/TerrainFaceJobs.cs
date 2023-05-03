@@ -7,15 +7,15 @@ namespace Planets
 {
     public struct TerrainFaceJobs : IMeshGenerator<TerrainFaceJobs.TerrainFaceData>
     {
-        public struct TerrainFaceData : IData
+        public struct TerrainFaceData
         {
-            public PlanetSettingsDTO PlanetSettings { get; }
+            public PlanetSettingsDto PlanetSettings { get; }
             public float3 LocalUp { get; }
             public int Resolution { get; }
             public float Radius { get; }
 
 
-            public TerrainFaceData(Vector3 localUp, PlanetSettingsDTO planetSettings)
+            public TerrainFaceData(Vector3 localUp, PlanetSettingsDto planetSettings)
             {
                 PlanetSettings = planetSettings;
                 LocalUp = localUp;
@@ -72,7 +72,7 @@ namespace Planets
             }
         }
 
-        private float3 SamplePlanetPoint(float3 point, PlanetSettingsDTO planetSettings)
+        private float3 SamplePlanetPoint(float3 point, PlanetSettingsDto planetSettings)
         {
             float elevation = 0;
             float firstLayerMask = 0;
