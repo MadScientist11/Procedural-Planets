@@ -2,6 +2,7 @@
 using System.Reflection;
 using UnityEditor;
 using UnityEditor.UIElements;
+using UnityEngine;
 using UnityEngine.UIElements;
 using Object = UnityEngine.Object;
 
@@ -25,14 +26,18 @@ namespace Planets.Editor
             root.Add(propertyField);
             root.Add(fieldsContainer);
 
+            Button updateButton = new Button(() => OnUpdateButtonClicked(null));
+            updateButton.text = "Update Planet";
+            updateButton.RegisterCallback<ChangeEvent<Object>>(OnUpdateButtonClicked);
+            root.Add(updateButton);
             propertyField.RegisterCallback<ChangeEvent<Object>>(OnPropertyFieldChanged);
 
             void OnPropertyFieldChanged(ChangeEvent<Object> changeEvent)
             {
+                if (property == null || property.objectReferenceValue == null)
+                    return;
                 fieldsContainer.Clear();
 
-                if (property.objectReferenceValue == null)
-                    return;
 
                 var planetSettings = property.objectReferenceValue as PlanetSettings;
                 planetSettings.RaiseChangedEvent();
@@ -40,7 +45,18 @@ namespace Planets.Editor
                 fieldsContainer.Add(DrawSettingsFields(property));
 
                 root.Add(fieldsContainer);
+
+
                 root.Bind(new SerializedObject(property.objectReferenceValue));
+            }
+
+            void OnUpdateButtonClicked(ChangeEvent<Object> changeEvent)
+            {
+                var planetSettings = property.objectReferenceValue as PlanetSettings;
+                bool initialState = planetSettings.AutoUpdate;
+                planetSettings.AutoUpdate = true;
+                OnPropertyFieldChanged(changeEvent);
+                planetSettings.AutoUpdate = initialState;
             }
         }
 
@@ -52,7 +68,7 @@ namespace Planets.Editor
             Box box = new Box();
             VisualElement foldoutsContainer = new VisualElement();
             _foldouts.Clear();
-            
+
             box.Add(foldoutsContainer);
 
             FieldInfo[] fields = typeof(PlanetSettings).GetFields(BindingFlags.Public | BindingFlags.Instance);

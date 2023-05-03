@@ -9,6 +9,7 @@ namespace Planets.Editor
     public class FoldoutPropertyDrawer : PropertyDrawer
     {
         private Foldout _foldout;
+        private PropertyDrawer _editor;
 
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
@@ -18,12 +19,14 @@ namespace Planets.Editor
             {
                 text = foldoutAttribute.Name
             };
-            
+            _foldout.Clear();
+
             Type propertyDrawer = EditorHelpers.GetPropertyDrawer(property.objectReferenceValue.GetType());
-            if(propertyDrawer != null)
+            if (propertyDrawer != null)
             {
-                PropertyDrawer editor = (PropertyDrawer)Activator.CreateInstance(propertyDrawer);
-                container.Add(editor.CreatePropertyGUI(property));
+                if (_editor == null)
+                    _editor = (PropertyDrawer)Activator.CreateInstance(propertyDrawer);
+                container.Add(_editor.CreatePropertyGUI(property));
             }
             else
             {
